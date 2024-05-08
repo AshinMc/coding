@@ -32,7 +32,7 @@ elif b=="N" :
 
 #Global Declares
 x = int
-
+y = 10
 #Random Logic
 computerRange = ["rock", "paper", "scissors"]
 computer = random.choice(computerRange)
