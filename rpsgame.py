@@ -1,69 +1,70 @@
-#Introduction
 import time
 import random
-print("Hello")
-time.sleep(1)
-print("Welcome to Rock, ", end= ' ') ,
-time.sleep(0.3)
-print("Paper, ", end= ' ') ,
-time.sleep(0.3)
-print("Scissor", end= ' ') ,
-time.sleep(0.7)
-print("...")
-time.sleep(1)
-print("Dear Player, The fate of the world lies on your hands..");
-time.sleep(1.8)
-print("May I know you name? ")
-player_name= input()
-print(f"{player_name} , sounds like the name of a hero")
-time.sleep(1)
-print("My time is almost up ... ")
-time.sleep(0.7)
-print(" Do you know how to use the sacred technique of...")
-time.sleep(0.3)
-b =input("Rock, Paper, Scissor (y or n) ?").upper()
-if b=="Y":
-    print("Good.. Proceed and save the world!")
-elif b=="N" :
-    print("These are the sacred rules, Rock beats Paper, Paper beats Rock and Scissor beats paper")
-    print(" Go ahead and save the world!")
- 
 
+inputs = {}
 
-#Global Declares
-x = int
-y = 10
-#Random Logic
-computerRange = ["rock", "paper", "scissors"]
-computer = random.choice(computerRange)
+def readInto(target, transformer, dependent):
+    buffer = input();
 
-#User Input
-user = input("Enter a choice (rock, paper, scissors): ")
-print(f"\nYou chose {user}, antagonist chose {computer}.\n")
-time.sleep(1)
+    if callable(transformer):
+        transformed = transformer(buffer)
 
-#Winning Logic
-x = int
-if user == computer:
-    print(f"Both players selected {user}. It's a tie!")
-elif user == "rock":
-    if computer == "scissors":
-        print("Rock smashes scissors! You win!")
-        
+        while transformed == None:
+            print("Your input in invalid, enter again")
+            transformed = transformer(input())
+
+        inputs[target] = transformed
     else:
-        print("Paper covers rock! You lose.")
-        print ("The End")
-elif user == "paper":
-    if computer == "rock":
-        print("Paper covers rock! You win!")
-        
-    else:
-        print("Scissors cuts paper! You lose.")
-        print ("The End")
-elif user == "scissors":
-    if computer == "paper":
-        print("Scissors cuts paper! You win!")
+        inputs[target] = buffer
 
-    else:
-        print("Rock smashes scissors! You lose.")
-        print ("The End")
+    if callable(dependent):
+        dependent(inputs[target])
+
+def display(messages):
+    for (msg, action) in messages:
+        print(msg, end='', flush=True)
+
+        match action:
+            case int() | float():
+                time.sleep(action)
+            case a if callable(a):
+                a()
+            case _:
+                print(f"Unknown action {a}")
+
+messages = [
+    ("Hello\n", 1),
+    ("Welcome to Rock", 0.3),
+    (" Paper", 0.3),
+    (" Scissor", 0.7),
+    ("...\n", 1),
+    ("Dear player, the fate of the world lies on your hands..\n", 1.8),
+    ("May I know your name: ", lambda : readInto("name", None, lambda s: display([(f"{inputs['name']}, sounds like the name of a hero\n", 1)]))),
+    ("My time is almost up...", 0.7),
+    ("Do you know how to use the sacred technique of... ", 0.3),
+    ("ROCK, PAPER, SCISSOR (Y OR N)?\n", lambda : readInto("accept", lambda s : True if s == "Y" else False if s == "N" else None, lambda b : print("Good.. Proceed and save the world!" if b else "These are the sacred rules, Rock beats Paper, Paper beats Rock and Scissor beats paper.\n Go ahead and save the world!" )))
+]
+
+display(messages)
+
+computer = random.choice(["rock", "paper", "scissors"])
+
+states = {
+    "rock": {
+        "rock": None,
+        "paper": False,
+        "scissors": True
+    },
+    "paper": {
+        "rock": True,
+        "paper": None,
+        "scissors": False
+    },
+    "scissors": {
+        "rock": False,
+        "paper": True,
+        "scissors": None
+    },
+}
+
+display([("Enter a choice (rock, paper, scissors): ", lambda : readInto("choice", lambda s : s if s == "rock" or s == "paper" or s == "scissors" else None, lambda user : print(f"You chose {user}, antagonist chose {computer}, " + ("it's a draw!" if states[user][computer] is None else "you win!" if states[user][computer] else "you lose.") + "\nThe end.")))])
